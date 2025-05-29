@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Love Matrix</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0018, #1e0030, #3a003a);
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff0066;
+            perspective: 1000px;
+        }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            pointer-events: none;
+            filter: blur(0.5px);
+        }
+        
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fall linear infinite;
+            will-change: transform;
+        }
+        
+        .heart-message {
+            font-size: 16px;
+            margin: 10px 0;
+            text-shadow: 0 0 8px rgba(255, 0, 102, 0.8);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            pointer-events: auto;
+            font-weight: bold;
+            transform: translateY(-50px);
+            animation: fadeIn 0.5s forwards;
+            padding: 5px 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(2px);
+            background: rgba(255, 0, 102, 0.05);
+            box-shadow: 0 0 10px rgba(255, 0, 102, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .heart-message:hover {
+            transform: scale(1.15) !important;
+            opacity: 1 !important;
+            text-shadow: 0 0 20px #ff0066;
+            background: rgba(255, 0, 102, 0.15);
+            box-shadow: 0 0 20px rgba(255, 0, 102, 0.4);
+        }
+        
+        .pink {
+            color: #ff66b3;
+        }
+        
+        .red {
+            color: #ff0066;
+        }
+        
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.7s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .popup.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .heart-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: heartbeat 1.2s infinite;
+            transform-style: preserve-3d;
+        }
+        
+        .big-heart {
+            font-size: 300px;
+            color: #ff0066;
+            text-shadow: 0 0 50px rgba(255, 0, 102, 0.9);
+            transform: translateZ(50px);
+            filter: drop-shadow(0 0 30px rgba(255, 0, 102, 0.8));
+            transition: all 0.5s ease;
+        }
+        
+        .big-heart:hover {
+            transform: translateZ(50px) scale(1.1);
+            filter: drop-shadow(0 0 50px rgba(255, 0, 102, 1));
+        }
+        
+        .love-text {
+            position: absolute;
+            bottom: 40px;
+            font-size: 28px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ff0066;
+            text-align: center;
+            width: 100%;
+            font-family: 'Brush Script MT', cursive;
+            letter-spacing: 2px;
+            transform: translateZ(30px);
+        }
+        
+        .title {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            text-align: center;
+            font-size: 42px;
+            color: #ff66b3;
+            text-shadow: 0 0 20px rgba(255, 102, 179, 0.9);
+            letter-spacing: 4px;
+            z-index: 10;
+            font-family: 'Brush Script MT', cursive;
+            animation: titleGlow 3s infinite alternate;
+            transform: translateZ(20px);
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            color: #ff66b3;
+            font-size: 18px;
+            z-index: 10;
+            text-shadow: 0 0 10px rgba(255, 102, 179, 0.7);
+            letter-spacing: 1px;
+            font-weight: 500;
+            transform: translateZ(20px);
+        }
+        
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-heart {
+            position: absolute;
+            font-size: 24px;
+            color: rgba(255, 0, 102, 0.5);
+            animation: float 15s infinite linear;
+            opacity: 0;
+            text-shadow: 0 0 5px rgba(255, 0, 102, 0.5);
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 0.85;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes heartbeat {
+            0% {
+                transform: scale(1);
+            }
+            15% {
+                transform: scale(1.1);
+            }
+            30% {
+                transform: scale(1);
+            }
+            45% {
+                transform: scale(1.05);
+            }
+            60% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes titleGlow {
+            0% {
+                text-shadow: 0 0 20px rgba(255, 102, 179, 0.7);
+            }
+            100% {
+                text-shadow: 0 0 40px rgba(255, 102, 179, 1), 
+                             0 0 60px rgba(255, 0, 102, 0.8);
+            }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 32px;
+                top: 20px;
+            }
+            
+            .big-heart {
+                font-size: 200px;
+            }
+            
+            .love-text {
+                font-size: 22px;
+            }
+            
+            .footer {
+                font-size: 16px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">for my bandarni</div>
+        <div class="matrix" id="matrix"></div>
+        <div class="floating-hearts" id="floatingHearts"></div>
+        <div class="popup" id="popup">
+            <div class="heart-container">
+                <div class="big-heart">❤️</div>
+                <div class="love-text">Sonis loves Jyaan</div>
+            </div>
+        </div>
+        <div class="footer">kunai auta text or image ma click gara ani magic hunxa.</div>
+    </div>
+
+    <script>
+        // Messages to display with emojis
+        const messages = [
+            {text: "i love you bandarni", emoji: "💖"},
+            {text: "i love jyaan", emoji: "💘"},
+            {text: "you are my everything", emoji: "💕"},
+            {text: "my heart is yours", emoji: "💓"},
+            {text: "eternal love", emoji: "💞"},
+            {text: "forever together", emoji: "💑"},
+            {text: "soulmates forever", emoji: "💏"},
+            {text: "you complete me", emoji: "💝"},
+            {text: "endless love", emoji: "💟"},
+            {text: "made for each other", emoji: "💗"}
+        ];
+        
+        const matrix = document.getElementById('matrix');
+        const popup = document.getElementById('popup');
+        const floatingHearts = document.getElementById('floatingHearts');
+        
+        // Create matrix columns
+        function createMatrix() {
+            const columnCount = Math.floor(window.innerWidth / 24);
+            
+            for (let i = 0; i < columnCount; i++) {
+                const column = document.createElement('div');
+                column.className = 'column';
+                
+                // Randomize animation duration and delay
+                const duration = 15 + Math.random() * 25;
+                const delay = Math.random() * 10;
+                column.style.animationDuration = `${duration}s`;
+                column.style.animationDelay = `${delay}s`;
+                
+                // Create messages for this column
+                const messageCount = 8 + Math.floor(Math.random() * 12);
+                for (let j = 0; j < messageCount; j++) {
+                    const message = document.createElement('div');
+                    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                    const colorClass = Math.random() > 0.5 ? 'pink' : 'red';
+                    message.className = `heart-message ${colorClass}`;
+                    
+                    // Add emoji and text
+                    message.innerHTML = `<span>${randomMessage.text}</span> <span class="emoji">${randomMessage.emoji}</span>`;
+                    
+                    // Add animation delay to each message
+                    message.style.animationDelay = `${Math.random() * 5}s`;
+                    
+                    // Add click event
+                    message.addEventListener('click', () => {
+                        popup.classList.add('active');
+                        
+                        // Create floating hearts from click position
+                        createFloatingHearts(5);
+                        
+                        // Auto close after 4 seconds
+                        setTimeout(() => {
+                            popup.classList.remove('active');
+                        }, 4000);
+                    });
+                    
+                    column.appendChild(message);
+                }
+                
+                matrix.appendChild(column);
+            }
+        }
+        
+        // Create floating hearts
+        function createFloatingHearts(count) {
+            for (let i = 0; i < count; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = '❤️';
+                
+                // Random position
+                const startX = Math.random() * window.innerWidth;
+                heart.style.left = `${startX}px`;
+                
+                // Random size
+                const size = 20 + Math.random() * 30;
+                heart.style.fontSize = `${size}px`;
+                
+                // Random animation duration
+                const duration = 8 + Math.random() * 12;
+                heart.style.animationDuration = `${duration}s`;
+                
+                // Random animation delay
+                heart.style.animationDelay = `${Math.random() * 2}s`;
+                
+                floatingHearts.appendChild(heart);
+                
+                // Remove heart after animation completes
+                setTimeout(() => {
+                    heart.remove();
+                }, duration * 1000);
+            }
+        }
+        
+        // Close popup when clicking outside
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) {
+                popup.classList.remove('active');
+            }
+        });
+        
+        // Initialize
+        createMatrix();
+        createFloatingHearts(15); // Initial floating hearts
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            matrix.innerHTML = '';
+            createMatrix();
+        });
+        
+        // Add continuous floating hearts
+        setInterval(() => {
+            createFloatingHearts(3);
+        }, 3000);
+    </script>
+</body>
+</html>
